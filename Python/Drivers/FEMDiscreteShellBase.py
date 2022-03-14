@@ -166,6 +166,10 @@ class FEMDiscreteShellBase(SimulationBase):
         MeshIO.Transform_Points(translate, rotCenter, rotAxis, rotDeg, scale, meshCounter, self.X)
         self.outputRod = True
 
+    def make_rod_from_points(self, pts):
+        _ = FEM.DiscreteShell.Make_Rod_From_Points(pts, self.X, self.rod)
+        self.outputRod = False # do not save rod<i>.obj files (same as shell<i>.obj but with faces)
+
     def make_and_add_rod_3D(self, rLen, nSeg, translate, rotCenter, rotAxis, rotDeg, scale):
         meshCounter = FEM.DiscreteShell.Make_Rod(rLen, nSeg, self.X, self.rod)
         MeshIO.Transform_Points(translate, rotCenter, rotAxis, rotDeg, scale, meshCounter, self.X)
@@ -267,12 +271,14 @@ class FEMDiscreteShellBase(SimulationBase):
     def advance_one_time_step(self, dt):
         #TODO: self.tol
         if self.normalFlowMag != 0:
+            print('self.normalFlowMag != 0:')
             # FEM.DiscreteShell.Initialize_Shell_Hinge_EIPC(self.shell_density, self.shell_E, self.shell_nu, self.shell_thickness, self.dt, self.dHat2, self.X, self.Elem, self.segs, \
             #     self.edge2tri, self.edgeStencil, self.edgeInfo, self.nodeAttr, self.massMatrix, self.gravity, self.bodyForce, \
             #     self.elemAttr, self.elasticity, self.kappa)
             FEM.DiscreteShell.Update_Normal_Flow_Neumann(self.X, self.Elem, self.massMatrix, self.normalFlowMag, self.bodyForce)
             # self.initialize_OIPC(math.sqrt(self.dHat2), 0)
         if self.t < self.MDBC_tmax and self.t > self.MDBC_tmin:
+            print('self.t < self.MDBC_tmax and self.t > self.MDBC_tmin:')
             if self.seqDBC < 0:
                 if self.t - self.MDBC_tmin >= self.MDBC_period * self.MDBC_periodCounter:
                     self.MDBC_periodCounter += 1
@@ -284,17 +290,20 @@ class FEMDiscreteShellBase(SimulationBase):
                 FEM.Load_Dirichlet(self.seqDBCPath + '/shell' + str(self.curFrameNum) + '.obj', self.seqDBC, Vector3d(0, -0.75, 0), self.DBC)
                 self.curFrameNum = self.curFrameNum + 1
         if self.DBCPopBackCounter < self.DBCPopBackAmt and self.t < self.DBCPopBackTEnd and self.t > self.DBCPopBackTStart:
+            print('self.DBCPopBackCounter < self.DBCPopBackAmt and self.t < self.DBCPopBackTEnd and self.t > self.DBCPopBackTStart:')
             if self.DBCPopBackFrameCounter % self.DBCPopBackBatch == 0:
                 for i in range(self.DBCPopBackStep):
                     FEM.Pop_Back_Dirichlet(self.DBCMotion, self.DBC)
                 self.DBCPopBackCounter = self.DBCPopBackCounter + 1
             self.DBCPopBackFrameCounter = self.DBCPopBackFrameCounter + 1
         if self.t < self.MDBC_tmax2 and self.t > self.MDBC_tmin2:
+            print('self.t < self.MDBC_tmax2 and self.t > self.MDBC_tmin2:')
             if self.t - self.MDBC_tmin2 >= self.MDBC_period2 * self.MDBC_periodCounter2:
                 self.MDBC_periodCounter2 += 1
                 FEM.Turn_Dirichlet(self.DBCMotion2)
             FEM.Step_Dirichlet(self.DBCMotion2, dt, self.DBC)
         if self.lv_fn >= 0:
+            print('self.lv_fn')
             # load next frame target as rest shape
             newX = Storage.V2dStorage() if self.dim == 2 else Storage.V3dStorage()
             newElem = Storage.V2iStorage() if self.dim == 2 else Storage.V3iStorage()
@@ -309,6 +318,7 @@ class FEMDiscreteShellBase(SimulationBase):
             FEM.Load_Dirichlet(self.seqDBCPath + '/' + str(self.lv_fn) + '.obj', 0, Vector3d(0, 0, 0), self.DBC)
             self.lv_fn = self.lv_fn + 1
         if self.elasticIPC:
+            print('self.elasticIPC')
             if self.split:
                 self.PNIterCount = self.PNIterCount + FEM.DiscreteShell.Advance_One_Step_SIE_Hinge_EIPC(self.Elem, self.segs, self.DBC, \
                     self.edge2tri, self.edgeStencil, self.edgeInfo, \
@@ -329,7 +339,9 @@ class FEMDiscreteShellBase(SimulationBase):
                     self.rodHinge, self.rodHingeInfo, self.stitchInfo, self.stitchRatio, self.k_stitch,\
                     self.discrete_particle, self.output_folder)
         else:
+            print('!self.elasticIPC')
             if self.flow:
+                print('self.flow:')
                 self.PNIterCount = self.PNIterCount + FEM.DiscreteShell.Advance_One_Step_IE_Flow(self.Elem, self.segs, self.DBC, \
                         self.edge2tri, self.edgeStencil, self.edgeInfo, \
                         self.thickness, self.bendingStiffMult, self.fiberStiffMult, self.inextLimit, self.s, self.sHat, self.kappa_s, \
@@ -340,7 +352,9 @@ class FEMDiscreteShellBase(SimulationBase):
                         self.rodHinge, self.rodHingeInfo, self.stitchInfo, self.stitchRatio, self.k_stitch,\
                         self.discrete_particle, self.output_folder)
             else:
+                print('!self.flow:')
                 if self.split:
+                    print('self.split:')
                     self.PNIterCount = self.PNIterCount + FEM.DiscreteShell.Advance_One_Step_SIE_Hinge(self.Elem, self.segs, self.DBC, \
                         self.edge2tri, self.edgeStencil, self.edgeInfo, \
                         self.thickness, self.bendingStiffMult, self.fiberStiffMult, self.inextLimit, self.s, self.sHat, self.kappa_s, \
@@ -350,6 +364,7 @@ class FEMDiscreteShellBase(SimulationBase):
                         self.tet, self.tetAttr, self.tetElasticity, self.rod, self.rodInfo, \
                         self.rodHinge, self.rodHingeInfo, self.discrete_particle, self.output_folder)
                 else:
+                    print('!self.split:')
                     self.PNIterCount = self.PNIterCount + FEM.DiscreteShell.Advance_One_Step_IE_Hinge(self.Elem, self.segs, self.DBC, \
                         self.edge2tri, self.edgeStencil, self.edgeInfo, \
                         self.thickness, self.bendingStiffMult, self.fiberStiffMult, self.inextLimit, self.s, self.sHat, self.kappa_s, \

@@ -3,6 +3,30 @@
 namespace JGSL {
 
 template <class T, int dim = 3>
+VECTOR<int, 4> Make_Rod_From_Points(const Eigen::Matrix<T, -1, dim> &pts,
+    MESH_NODE<T, dim>& X,
+    std::vector<VECTOR<int, 2>>& rod)
+{
+    VECTOR<int, 4> counter;
+    counter[0] = X.size;
+    counter[1] = rod.size();
+    size_t nv = pts.rows();
+    
+    X.Reserve(X.size + nv);
+    rod.reserve(rod.size() + nv - 1);
+
+    for (int i = 0; i < nv - 1; ++i) {
+        X.Append(VECTOR<T, dim>(pts(i, 0), pts(i, 1), pts(i, 2)));
+        rod.emplace_back(counter[0] + i, counter[0] + i + 1);
+    }
+    X.Append(VECTOR<T, dim>(pts(nv-1, 0), pts(nv-1, 1), pts(nv-1, 2)));
+
+    counter[2] = X.size;
+    counter[3] = rod.size();
+    return counter;
+}
+
+template <class T, int dim = 3>
 VECTOR<int, 4> Make_Rod(T len, int nSeg,
     MESH_NODE<T, dim>& X,
     std::vector<VECTOR<int, 2>>& rod)

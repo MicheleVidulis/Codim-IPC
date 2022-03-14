@@ -26,10 +26,7 @@ if __name__ == "__main__":
         # pts[-2::, :] += 2e0*rod_radius*np.ones(3) # slightly perturb last nodes
         nv = pts.shape[0]
 
-        ptsVector = []
-        for i in range(nv):
-            ptsVector.append(Vector3d(pts[i, 0], pts[i, 1], pts[i, 2]))
-        sim.make_rod_from_points(StdVectorVector3d(ptsVector))
+        sim.make_rod_from_points(pts)
 
         # Boundary conditions
         fixedPts = [0, 1, nv-2, nv-1]
@@ -55,6 +52,5 @@ if __name__ == "__main__":
 
         sim.output_folder = "output/" + os.path.splitext(os.path.basename(sys.argv[0]))[0] + "/" + knot_type + "/" + str(braid_idx) + "/"
         os.makedirs(sim.output_folder, exist_ok=True)
-        sim.outputRod = False # do not save rod<i>.obj files (same as shell<i>.obj but with faces)
 
         sim.run()

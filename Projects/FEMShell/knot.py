@@ -13,12 +13,8 @@ if __name__ == "__main__":
     nv = 100
     rod_radius = 0.05
     pts = define_knot(nv, r=0.5, Ti=0, Tf=2*np.pi, duplPts=0)  # last node is duplicate of first one 
-    pts[-1, :] += 1e-2*rod_radius*np.ones(3)  # slightly perturb last node
-
-    ptsVector = []
-    for i in range(nv):
-        ptsVector.append(Vector3d(pts[i, 0], pts[i, 1], pts[i, 2]))
-    sim.make_rod_from_points(StdVectorVector3d(ptsVector))
+    pts[-1, :] += 1e-8*rod_radius*np.ones(3)  # slightly perturb last node
+    sim.make_rod_from_points(pts)
 
     # Boundary conditions
     fixedPts = [0, 1, nv-2, nv-1]
@@ -32,7 +28,7 @@ if __name__ == "__main__":
 
     sim.staticSolve = True  # faster: why? What is it? No intertia? Then dt should not have any effect, but the results change depending on dt
     sim.dt = 0.01
-    sim.frame_dt = 10.0 / 24
+    sim.frame_dt = 1.0 / 24
     # sim.dt = 1.0
     # sim.frame_dt = 100.0 / 24
     sim.frame_num = 24
