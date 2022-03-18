@@ -6,6 +6,7 @@ set(CMAKE_CXX_COMPILER /usr/bin/g++)
 endif()
 project(JGSL CXX)
 
+
 set(LINEAR_SOLVER "CHOLMOD" CACHE STRING "Direct linear system solver to use (options: EIGEN, CHOLMOD)")
 set_property(CACHE LINEAR_SOLVER PROPERTY STRINGS "EIGEN" "CHOLMOD")
 
@@ -22,6 +23,33 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build")
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/CMake)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Library)
+
+if(NOT CMAKE_BUILD_TYPE)
+    message(STATUS "No build type selected, default to RelWithAssert")
+    set(CMAKE_BUILD_TYPE "RelWithAssert")
+endif()
+
+set(CMAKE_BUILD_TYPE "${CMAKE_BUILD_TYPE}" CACHE STRING "Choose the type of build. Options are: None Debug Release RelWithDebInfo MinSizeRel RelWithAssert" FORCE)
+
+
+# Color output
+include(UseColors)
+
+# Make sure warnings/errors are still colorized when using Ninja for building.
+if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
+    add_definitions(-fdiagnostics-color=always)
+endif()
+
+# Make sure warnings/errors are still colorized when using Ninja for building.
+add_definitions(-fdiagnostics-color=always)
+
+# Export compile flags(used for autocompletion of the C++ code)
+set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
+
+# CMake plugin for vscode
+include(CMakeToolsHelpers OPTIONAL)
+
+
 
 find_package(PythonInterp 3 REQUIRED)
 add_subdirectory(Externals)

@@ -404,8 +404,8 @@ template <class T>
 void Write_TetMesh_Vtk(MESH_NODE<T, 3>& X,
     MESH_ELEM<3>& indices, const std::string& filePath)
 {
-    assert((X.size() != 0) && "The X array for writing tetmesh vtk is empty.");
-    assert((indices.size() != (size_t)0) && "The tet mesh data structure for writing tetmesh vtk is empty.");
+    // assert((X.size() != 0) && "The X array for writing tetmesh vtk is empty.");
+    // assert((indices.size() != (size_t)0) && "The tet mesh data structure for writing tetmesh vtk is empty.");
 
     std::ofstream os(filePath);
     if (!os.is_open()) {
