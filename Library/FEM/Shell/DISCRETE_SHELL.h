@@ -1088,6 +1088,7 @@ void Export_Discrete_Shell(py::module& m) {
     shell_m.def("Add_Garment", &Add_Garment_3D<double>);
     shell_m.def("Add_Shell", &Add_Discrete_Shell_3D<double>);
     shell_m.def("Make_Rod", &Make_Rod<double, 3>);
+    shell_m.def("Make_Rod_From_Points", &Make_Rod_From_Points<double, 3>);
     shell_m.def("Make_Rod_Net", &Make_Rod_Net<double, 3>);
     shell_m.def("Add_Discrete_Particles", &Add_Discrete_Particles<double, 3>);
     shell_m.def("Initialize_Shell", &Initialize_Discrete_Shell<double, 3, true, false>);
